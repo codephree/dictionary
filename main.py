@@ -55,7 +55,7 @@ root.resizable(False, False)
 photo = PhotoImage(file="dico.png")
 bg = Image.open("bg.jpg")
 root.iconphoto(False, photo)
-root.configure(background=bg)
+
 
 # Gets the requested values of the height and widht.
 windowWidth = root.winfo_reqwidth()
