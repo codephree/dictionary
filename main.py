@@ -13,8 +13,7 @@ def check_internet():
     timeout = 5
     try:
         _ = requests.get(url, timeout=timeout)
-        
-    return True
+        return True
     except requests.ConnectionError:
         return False
 #======================= Function to search for words in Dictionary ==========================#
@@ -54,7 +53,9 @@ root.title('Dictionary with Python')
 # root.config(background="white")
 root.resizable(False, False)
 photo = PhotoImage(file="dico.png")
+bg = Image.open("bg.jpg")
 root.iconphoto(False, photo)
+root.configure(background=bg)
 
 # Gets the requested values of the height and widht.
 windowWidth = root.winfo_reqwidth()
