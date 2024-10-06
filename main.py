@@ -67,6 +67,8 @@ class App(customtkinter.CTk):
         self.title("Dictionary")
         self.geometry("650x550")
         self._set_appearance_mode('system')
+        self.wm_iconbitmap('dico.ico')
+        # self.iconbitmap('dico.png')
         
         if self.check_internet():
             
