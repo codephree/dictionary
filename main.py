@@ -1,117 +1,102 @@
-from tkinter import *
+import tkinter 
 from PIL import ImageTk, Image
 import requests
 import os
-import _env
+import customtkinter
+# import _env
+
+class App(customtkinter.CTk):
+    #======================= Function to check internet connection ==========================#
+    def check_internet(self):
+        url = 'http://www.google.com/'
+        timeout = 5
+        try:
+            _ = requests.get(url, timeout=timeout)
+            return True
+        except requests.ConnectionError:
+            return False
+
+    #======================= Function to search for words in Dictionary ==========================#
+    def queryApi(self, words):
+            url = "https://wordsapiv1.p.rapidapi.com/words/"+words
+            headers = {
+                'x-rapidapi-host': 'wordsapiv1.p.rapidapi.com',   #os.environ.get("host"),
+                'x-rapidapi-key': 'EvnlrUuK15mshjOAnvPOUgUFyldkp1egDpgjsnfiCBoEoc2I93'  #os.environ.get("api-key")
+            }
+
+            response = requests.request("GET", url, headers=headers)
+            jsonresponse = response.json()
+            display = ''
+            if response.status_code == 200:
+                 final = jsonresponse['results']
+                #  print(final)
+                 return True, final
+            elif response.status_code == 404:
+                 return False,  jsonresponse['message'] 
+            else:
+                 return False , "Error from the API.."
+               
+
+            return display
+    
+    #======================= Function to Put definition into Label ==========================#
+
+    def seerchDico(self):
+        serachWords = self.search.get()
+        scorrableTitle ="Result word for " + serachWords
+        response = self.queryApi(serachWords)
+        self.scrollable.configure(label_text=scorrableTitle)
+        
+        if(response[0]):
+             for idx, value in enumerate(iterable=response[1]):
+                 defini = str(idx + 1) + ' - { '+ value['partOfSpeech'] + ' } ' + value['definition']
+                 self.result = customtkinter.CTkLabel(self.scrollable, width=550, height=10, 
+                                                 text=defini, text_color='black',wraplength=500,
+                                                 compound="left", justify="left", anchor="w"
+                                                 ).pack(pady=(0, 10),expand = True,side = 'top', fill='both')
+                
+        else:
+            self.result = customtkinter.CTkLabel(self.scrollable, width=350, height=10, 
+                                                 text=response[1], text_color='black',wraplength=500,
+                                                 compound="left", justify="left", anchor="w"
+                                                 ).pack(pady=5)
+            
+    def __init__(self):
+        super().__init__()
+
+        self.title("Dictionary")
+        self.geometry("650x550")
+        self._set_appearance_mode('system')
+        
+        if self.check_internet():
+            
+            self.title = customtkinter.CTkLabel(self,text='Enter your search word below:',
+                                                    fg_color='transparent')
+            self.title.pack(padx=10, pady=10)
+
+            searchWords = tkinter.StringVar()
+            self.search =  customtkinter.CTkEntry(self,width=550, 
+                                                height=40, 
+                                                corner_radius=10,
+                                                textvariable=searchWords,
+                                                placeholder_text='Enter your words')
+            self.search.pack(padx=10,pady=10)
+
+            self.scrollable = customtkinter.CTkScrollableFrame(self,width=550, height=300, fg_color='white')
+            self.scrollable.pack(padx=10, pady=10)
 
 
-#======================= Function to check internet connection ==========================#
+            self.button = customtkinter.CTkButton(self,text='Search', border_spacing=0, command=self.seerchDico)
+            self.button.pack(padx=10, pady=10)
+        else:
+            my_image = customtkinter.CTkImage(light_image=Image.open("caution.png"),
+                                  dark_image=Image.open("caution.png"),size=(300, 300)
+                                  )
+            self.internetError = customtkinter.CTkLabel(self,image=my_image,text="")
+            self.internetError.pack(pady=50)
+            self.internetErrorLabelerl = customtkinter.CTkLabel(self, text='Internet Required to use this Application'
+                                                            ).pack(pady=4)
+        
 
-
-def check_internet():
-    url = 'http://www.google.com/'
-    timeout = 5
-    try:
-        _ = requests.get(url, timeout=timeout)
-        return True
-    except requests.ConnectionError:
-        return False
-#======================= Function to search for words in Dictionary ==========================#
-
-
-def seerchDico():
-    words = query.get()
-    display = ''
-    url = "https://wordsapiv1.p.rapidapi.com/words/"+words
-    headers = {
-        'x-rapidapi-host': os.environ.get("host"),
-        'x-rapidapi-key': os.environ.get("api-key")
-    }
-
-    response = requests.request("GET", url, headers=headers)
-    jsonresponse = response.json()
-    if response.status_code == 200:
-        final = jsonresponse['results']
-        for items in range(len(final)):
-            display += str(items + 1) + ' - {' + final[items]['partOfSpeech'] + "} \t" + final[items]['definition'] + \
-                "\n \n"
-    elif response.status_code == 404:
-        display = "Error !! " + query.get() + "  " + \
-            jsonresponse['message'] + ". Please check the spelling"
-    else:
-        display = "Error from the API.."
-    result.config(state=NORMAL)
-    result.delete('1.0', END)
-    result.insert(END, display)
-    result.config(state=DISABLED)
-
-#======================= Set Root ==========================#
-
-
-root = Tk()
-root.title('Dictionary with Python')
-# root.config(background="white")
-root.resizable(False, False)
-photo = PhotoImage(file="dico.png")
-bg = Image.open("bg.jpg")
-root.iconphoto(False, photo)
-
-
-# Gets the requested values of the height and widht.
-windowWidth = root.winfo_reqwidth()
-windowHeight = root.winfo_reqheight()
-# Gets both half the screen width/height and window width/height
-positionRight = int(root.winfo_screenwidth()/2 - windowWidth/2)
-positionDown = int(root.winfo_screenheight()/2 - windowHeight/2)
-
-# Positions the window in the center of the page.
-# Gets the requested values of the height and widht.
-root.geometry("+{}+{}".format(positionRight, positionDown))
-windowWidth = root.winfo_reqwidth()
-windowHeight = root.winfo_reqheight()
-
-# Gets both half the screen width/height and window width/height
-positionRight = int(root.winfo_screenwidth()/2 - windowWidth/2)
-positionDown = int(root.winfo_screenheight()/2 - windowHeight/2)
-
-# Positions the window in the center of the page.
-root.geometry("+{}+{}".format(positionRight, positionDown))
-
-#======================= Set Element ==========================#
-
-labTitle = Label(root, font="Helvetica 32 bold",
-                 text="Dictionary", width=20, fg="black")
-labTitle.grid(row=1, column=3, columnspan=4)
-
-if check_internet():
-    query = Entry(root, width=26)
-    query.grid(row=4, column=3, columnspan=4)
-    query.insert(0, "Enter search word")
-
-    btnsearch = Button(root, text="Search", bd=1, width=24,
-                       height=2, command=seerchDico)
-    btnsearch.grid(row=5, column=3, columnspan=4, pady=10)
-
-    result = Text(root, height=20, width=35, bd=1,
-                  highlightthickness=0, relief=RIDGE, wrap=WORD)
-    result.insert(END, "Waiting for your input")
-    result.config(state=DISABLED)
-    result.grid(row=6, column=3, columnspan=4)
-else:
-    img = ImageTk.PhotoImage(Image.open("caution.png"))
-    internetError = Label(root, image=img)
-    internetError.grid(row=4, column=3, columnspan=4)
-    labInternet = Label(root, font="Helvetica 23",
-                        text="Internet not Available", fg="black")
-    labInternet.grid(row=5, column=3, columnspan=4)
-
-
-btnexit = Button(root, text="Exit Dictionary", bd=1,
-                 width=24, height=2, command=root.quit)
-btnexit.grid(row=8, column=3, columnspan=4, pady=10)
-
-
-labTitle = Label(root, font="Helvetica 32 bold", text="", width=20, fg="black")
-labTitle.grid(row=9, column=3, columnspan=4)
-
-root.mainloop()
+app = App()
+app.mainloop()
