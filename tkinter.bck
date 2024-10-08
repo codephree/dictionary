@@ -135,3 +135,22 @@ labTitle.grid(row=1, column=3, columnspan=4)
 #     result.config(state=DISABLED)
 
 # Create the base 
+
+
+        # CTkEntry(self.scrollable,
+        #                                      textvariable='',
+        #                                       bg_color='white',
+        #                                       width=550, 
+        #                                       height=10).pack(pady=(0, 10),expand = True,side = 'top', fill='both')
+
+
+        # customtkinter.CTkLabel(self.scrollable, width=550, height=10, 
+        #                                          text=defini, text_color='black',wraplength=500,
+        #                                          compound="left", justify="left", anchor="w"
+                                                #  ).pack(pady=(0, 10),expand = True,side = 'top', fill='both')
+
+
+ self.result = customtkinter.CTkLabel(self.scrollable, width=550, height=10, 
+                                                 text=defini, text_color='black',wraplength=500,
+                                                 compound="left", justify="left", anchor="w"
+                                                 ).pack(pady=(0, 10),expand = True,side = 'top', fill='both')

@@ -27,6 +27,7 @@ class App(customtkinter.CTk):
             response = requests.request("GET", url, headers=headers)
             jsonresponse = response.json()
             display = ''
+            # print(jsonresponse)
             if response.status_code == 200:
                  final = jsonresponse['results']
                 #  print(final)
@@ -43,33 +44,61 @@ class App(customtkinter.CTk):
 
     def seerchDico(self):
         serachWords = self.search.get()
-        scorrableTitle ="Result word for " + serachWords
+        scorrableTitle ="Result words for " + serachWords.capitalize()
         response = self.queryApi(serachWords)
-        self.scrollable.configure(label_text=scorrableTitle)
+        defini = ''
+        
+        if len(self.result.get('1.0',tkinter.END)[:-1]):
+            self.result.configure(state='normal')
+            self.result.delete(1.0, tkinter.END)
+            self.result.configure(state='disabled')
         
         if(response[0]):
              for idx, value in enumerate(iterable=response[1]):
-                 defini = str(idx + 1) + ' - { '+ value['partOfSpeech'] + ' } ' + value['definition']
-                 self.result = customtkinter.CTkLabel(self.scrollable, width=550, height=10, 
-                                                 text=defini, text_color='black',wraplength=500,
-                                                 compound="left", justify="left", anchor="w"
-                                                 ).pack(pady=(0, 10),expand = True,side = 'top', fill='both')
-                
+                 defini += str(idx + 1) + ' - { '+ value['partOfSpeech'] + ' } ' + value['definition'] + '\n \n'
         else:
-            self.result = customtkinter.CTkLabel(self.scrollable, width=350, height=10, 
-                                                 text=response[1], text_color='black',wraplength=500,
-                                                 compound="left", justify="left", anchor="w"
-                                                 ).pack(pady=5)
-            
+            defini = response[1]
+         
+        self.title.configure(text=scorrableTitle)
+        
+        # pack_configure(text=scorrableTitle)
+
+        self.result.configure(state='normal')
+        self.result.insert('end', text=defini)
+        self.result.configure(state='disabled')
+        
+    #======================= Function to hide scrollable frame ==========================#
+    def hide_scrollable(self):
+             self.scrollable.pack_forget()   
+
+    #======================= Function to define top menu ==========================#
+    def define_app_menu(self, menu):
+        self.file_menu = tkinter.Menu(menu, bd=0)
+        menu.add_cascade(label='File', menu=self.file_menu)
+        self.file_menu.add_command(label='Exit', command=self.quit)
+
+        self.options_menu = tkinter.Menu(menu)
+        menu.add_cascade(label='Options', menu=self.options_menu)
+        self.options_menu.add_command(label='Refresh app', command=self.quit)
+        self.options_menu.add_separator()
+        self.options_menu.add_command(label='Internet Option', command=self.quit)
+        
+        self.exit_menu = tkinter.Menu(menu)
+        menu.add_cascade(label='Exit', menu=self.exit_menu)
+   
+    #======================= Function to Initiate the app ==========================#
     def __init__(self):
         super().__init__()
 
         self.title("Dictionary")
-        self.geometry("650x550")
+        self.geometry("400x500")
         self._set_appearance_mode('system')
         self.wm_iconbitmap('dico.ico')
-        # self.iconbitmap('dico.png')
+        self.menu = tkinter.Menu(self)
+        self.config(menu=self.menu)
         
+        
+        #======================= Logic to check if the internt is available ==========================#
         if self.check_internet():
             
             self.title = customtkinter.CTkLabel(self,text='Enter your search word below:',
@@ -77,24 +106,28 @@ class App(customtkinter.CTk):
             self.title.pack(padx=10, pady=10)
 
             searchWords = tkinter.StringVar()
-            self.search =  customtkinter.CTkEntry(self,width=550, 
+            self.search =  customtkinter.CTkEntry(self,width=350, 
                                                 height=40, 
                                                 corner_radius=10,
                                                 textvariable=searchWords,
                                                 placeholder_text='Enter your words')
             self.search.pack(padx=10,pady=10)
-
-            self.scrollable = customtkinter.CTkScrollableFrame(self,width=550, height=300, fg_color='white')
-            self.scrollable.pack(padx=10, pady=10)
-
-
+            
             self.button = customtkinter.CTkButton(self,text='Search', border_spacing=0, command=self.seerchDico)
             self.button.pack(padx=10, pady=10)
+            
+            self.title = customtkinter.CTkLabel(self, text='')
+            self.title.pack()
+            
+            self.result = customtkinter.CTkTextbox(self, width=350, 
+                                               height=250, state='disabled')
+            self.result.pack()
         else:
             my_image = customtkinter.CTkImage(light_image=Image.open("caution.png"),
                                   dark_image=Image.open("caution.png"),size=(300, 300)
                                   )
-            self.internetError = customtkinter.CTkLabel(self,image=my_image,text="")
+            self.internetError = customtkinter.CTkLabel(self,image=my_image,text="" ,
+                                                        highlightthickness=0, relief=tkinter.RIDGE, wrap=tkinter.WORD)
             self.internetError.pack(pady=50)
             self.internetErrorLabelerl = customtkinter.CTkLabel(self, text='Internet Required to use this Application'
                                                             ).pack(pady=4)
